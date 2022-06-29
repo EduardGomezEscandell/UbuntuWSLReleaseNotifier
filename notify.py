@@ -4,6 +4,7 @@ import subprocess
 import re
 from typing import List
 
+
 def upgrade_message(update_query_command: str, *flags: List[str], verbose=False) -> str:
     full_command = [update_query_command, *flags]
     release_update_response = subprocess.run(full_command, capture_output=True).stdout.decode("utf-8")
@@ -24,7 +25,8 @@ def upgrade_message(update_query_command: str, *flags: List[str], verbose=False)
         "read and modify file /etc/update-manager/release-upgrades",
     ])
 
-def help() -> str:
+
+def _help() -> str:
     print("Displays a message if there is an Ubuntu update")
     print("available, does nothing otherwise. It is intended")
     print("to be called from .bashrc or .profile.")
@@ -33,11 +35,12 @@ def help() -> str:
     print("  -v                Enables verbose mode")
     print("  -h or --help      Prints this screen")
 
-def parse_arguments() -> bool:
+
+def _parse_arguments() -> bool:
     argv = set(sys.argv[1:])
 
-    if "-h"  in argv or "--help" in argv:
-        help()
+    if "-h" in argv or "--help" in argv:
+        _help()
         sys.exit(0)
 
     verbose = False
@@ -46,7 +49,7 @@ def parse_arguments() -> bool:
         verbose = True
 
     if argv:
-        help()
+        _help()
         print()
         print(f"Unknown argument{'s' if len(argv) > 1 else ''}: ")
         [print(f"    {a}") for a in argv]
@@ -54,8 +57,9 @@ def parse_arguments() -> bool:
 
     return verbose
 
+
 def main() -> int:
-    verbose = parse_arguments()
+    verbose = _parse_arguments()
     try:
         msg = upgrade_message("do-release-upgrade", "-c", verbose=verbose)
         if msg:
