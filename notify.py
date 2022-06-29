@@ -3,12 +3,13 @@ import sys
 import subprocess
 import re
 
-def upgrade_message(upgrade_command: str, *args: list, verbose = False) -> str:
+
+def upgrade_message(upgrade_command: str, *args: list, verbose=False) -> str:
     full_command = [upgrade_command, *args]
     release_update_response = subprocess.run(full_command, capture_output=True).stdout.decode("utf-8")
     if verbose:
         print("> " + release_update_response.replace("\n", "\n> "))
-    
+
     result = re.search(r"New release '(.*)' available\.", release_update_response)
     if not result:
         return None
@@ -23,9 +24,10 @@ def upgrade_message(upgrade_command: str, *args: list, verbose = False) -> str:
         "read and modify file /etc/update-manager/release-upgrades",
     ])
 
+
 def main():
     verbose = "-v" in sys.argv
-        
+
     try:
         msg = upgrade_message("do-release-upgrade", "-c", verbose=verbose)
         if msg:
@@ -37,6 +39,7 @@ def main():
         if verbose:
             raise e
         return 1
+
 
 if __name__ == '__main__':
     sys.exit(main())
