@@ -22,14 +22,14 @@ class TestUpgradeNotifier(unittest.TestCase):
                         r"To upgrade to the latest non-LTS development release \n"       \
                         r"set Prompt=normal in /etc/update-manager/release-upgrades.'\""
         msg = notify.upgrade_message("printf", fake_response)
-        self.assertEqual(msg, None)
+        self.assertFalse(msg)
 
     def testDisabledUpgrade(self):
         fake_response = r"\"Checking for a new Ubuntu release\n"                         \
                         r"In /etc/update-manager/release-upgrades Prompt \n"             \
                         r"is set to never so upgrading is not possible.\""
         msg = notify.upgrade_message("printf", fake_response)
-        self.assertEqual(msg, None)
+        self.assertFalse(msg)
 
 
 if __name__ == '__main__':
