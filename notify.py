@@ -36,7 +36,7 @@ def _read_timestamp(verbose: bool = False) -> datetime.datetime:
         with open(_TIMESTAMP_FILE, "r") as f:
             return datetime.datetime.fromisoformat(f.read())
     except Exception as e:
-        _log(verbose, f"Failed to read timestamp: {e.what}")
+        _log(verbose, f"Failed to read timestamp")
         return datetime.datetime(1900, 1, 1).astimezone()
 
 
@@ -46,7 +46,7 @@ def _write_timestamp(timestamp: datetime.datetime, verbose: bool = False) -> Non
         with open(_TIMESTAMP_FILE, "w") as f:
             f.write(timestamp.isoformat())
     except Exception as e:
-        _log(verbose, f"Failed to write timestamp: {e.what}")
+        _log(verbose, f"Failed to write timestamp")
 
 
 def _print_or_raise(errcode: int, message_or_exception, verbose: bool = False) -> int:
