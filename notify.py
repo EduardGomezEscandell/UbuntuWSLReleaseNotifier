@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = False, timeout: float = 5) -> Tuple[int, str]:
     full_command = [update_query_cmd, *flags]
-    
+
     try:
         release_update_response = subprocess.check_output(
             full_command, text=True, encoding="utf-8", stderr=subprocess.STDOUT, timeout=timeout)
@@ -24,14 +24,13 @@ def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = Fa
         return (0, "")
 
     release = result.group(1)
-    return (0,
-        "Release available\n"                                             \
-        "=================\n"                                             \
-        f"A new release of Ubuntu is available: Ubuntu {release}\n"       \
-        "To know more, run do-release-upgrade\n"                          \
-        "To disable or change the frequency of these alerts,\n"           \
-        "read and modify file /etc/update-manager/release-upgrades"
-    )
+    return (0, "Release available\n"
+               "=================\n"
+               f"A new release of Ubuntu is available: Ubuntu {release}\n"
+               "To know more, run do-release-upgrade\n"
+               "To disable or change the frequency of these alerts,\n"
+               "read and modify file /etc/update-manager/release-upgrades"
+            )
 
 
 def _help() -> str:
@@ -70,7 +69,7 @@ def main() -> int:
     verbose = _parse_arguments()
 
     errcode, msg = upgrade_message("do-release-upgrade", "-c", verbose=verbose)
-    
+
     if not errcode and msg:
         print(msg)
     elif not errcode and verbose:
