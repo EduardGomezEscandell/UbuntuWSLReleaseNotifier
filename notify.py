@@ -5,7 +5,6 @@ import re
 import argparse
 import datetime
 import os
-import json
 
 from typing import List, Tuple, Dict
 
@@ -37,7 +36,7 @@ def _read_timestamp(verbose: bool) -> datetime.datetime:
         with open(_TIMESTAMP_FILE, "r") as f:
             return datetime.datetime.fromisoformat(f.read())
     except Exception as e:
-        _log(verbose, "Failed to read timestamp")
+        _log(verbose, f"Failed to read timestamp: {e.what}")
         return datetime.datetime(1900, 1, 1).astimezone()
 
 
@@ -47,7 +46,7 @@ def _write_timestamp(timestamp: datetime.datetime, verbose: bool) -> None:
         with open(_TIMESTAMP_FILE, "w") as f:
             f.write(timestamp.isoformat())
     except Exception as e:
-        _log(verbose, "Failed to write timestamp")
+        _log(verbose, f"Failed to write timestamp: {e.what}")
 
 
 def _print_or_raise(errcode: int, message_or_exception, verbose: bool) -> int:
