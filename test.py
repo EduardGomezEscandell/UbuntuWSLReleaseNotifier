@@ -1,4 +1,7 @@
 import unittest
+import subprocess
+import time
+
 import notify
 
 
@@ -37,7 +40,16 @@ class TestUpgradeNotifier(unittest.TestCase):
     def testFailure(self):
         errcode, msg = notify.upgrade_message("python3", "-c", "raise RuntimeError('test')")
         self.assertEqual(errcode, 1)
-        self.assertIsInstance(msg, Exception)
+        self.assertIsInstance(msg, subprocess.CalledProcessError)
+
+    def testTimeout(self):
+        start = time.time()
+        errcode, msg = notify.upgrade_message("sleep", "5", timeout=1)
+        time_elapsed_ms = 1000*(time.time() - start)
+
+        self.assertEqual(errcode, 1)
+        self.assertIsInstance(msg, subprocess.TimeoutExpired)
+        self.assertLessEqual(time_elapsed_ms, 1500)
 
 
 if __name__ == '__main__':

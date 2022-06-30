@@ -5,12 +5,13 @@ import re
 from typing import List, Tuple
 
 
-def upgrade_message(update_query_command: str, *flags: List[str], verbose=False) -> Tuple[int, str]:
-    full_command = [update_query_command, *flags]
+def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = False, timeout: float = 5) -> Tuple[int, str]:
+    full_command = [update_query_cmd, *flags]
     
     try:
-        release_update_response = subprocess.check_output(full_command, text=True, stderr=subprocess.STDOUT, encoding="utf-8")
-    except Exception as e:
+        release_update_response = subprocess.check_output(
+            full_command, text=True, encoding="utf-8", stderr=subprocess.STDOUT, timeout=timeout)
+    except subprocess.SubprocessError as e:
         if verbose:
             raise e
         return (1, e)
@@ -74,8 +75,6 @@ def main() -> int:
         print(msg)
     elif not errcode and verbose:
         print("NO MESSAGE")
-    elif errcode and verbose:
-        raise msg
 
     return errcode
 
