@@ -44,7 +44,7 @@ def _parse_arguments() -> bool:
         sys.exit(0)
 
     verbose = False
-    if "-v" or "--verbose" in argv:
+    if argv.intersection({"-v", "--verbose"}):
         argv.difference_update({"-v", "--verbose"})
         verbose = True
 
