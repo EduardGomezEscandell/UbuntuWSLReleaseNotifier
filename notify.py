@@ -17,17 +17,16 @@ def _log(enable: bool, *message) -> None:
         print(*message)
 
 
-def _frequecies() -> Dict[str, int]:
-    freqs = {
-        "always": lambda *_: True,
-        "never": lambda *_: False,
-        "hourly": lambda now, last: (now - last).total_seconds() >= 3600,
-        "daily": lambda now, last: (now - last).days >= 1,
-        "weekly": lambda now, last: (now - last).days >= 7,
-        "monthly": lambda now, last: (now - last).days >= 30,
-        "yearly": lambda now, last: (now - last).days >= 365,
+def _cooldowns() -> Dict[str, int]:
+    return {
+        "none": lambda *_: True,
+        "hour": lambda now, last: (now - last).total_seconds() >= 3600,
+        "day": lambda now, last: (now - last).days >= 1,
+        "week": lambda now, last: (now - last).days >= 7,
+        "month": lambda now, last: (now - last).days >= 30,
+        "year": lambda now, last: (now - last).days >= 365,
+        "inf": lambda *_: False,
     }
-    return freqs
 
 
 def _read_timestamp(verbose: bool = False) -> datetime.datetime:
@@ -69,16 +68,16 @@ def _parse_arguments() -> argparse.Namespace:
         '-t', '--timeout', dest='timeout', type=float, metavar='SECONDS', default=1.5,
         help='set a timeout for the upgrade querry.')
     parser.add_argument(
-        '-f', '--frequency', dest='frequency', type=str, choices=_frequecies().keys(),
-        default="daily", help="set the frequency at which you are notified"
+        '-c', '--cooldown', dest='cooldown', type=str, choices=_cooldowns().keys(),
+        default="daily", help="set a cooldown for this alert"
     )
 
     return parser.parse_args()
 
 
-def _check_frequency(frequency: str, verbose: bool = False) -> bool:
+def _check_cooldown(cooldown: str, verbose: bool = False) -> bool:
     last_notif = _read_timestamp(verbose)
-    validator = _frequecies()[frequency]
+    validator = _cooldowns()[cooldown]
     now = datetime.datetime.now().astimezone()
     if validator(now, last_notif):
         _write_timestamp(now, verbose)
@@ -106,7 +105,7 @@ def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = Fa
                "=================\n"
                f"A new release of Ubuntu is available: Ubuntu {release}\n"
                "To know more, run do-release-upgrade\n"
-               "To disable or change the frequency of these alerts,\n"
+               "To change the types of updates you are notified about,\n"
                "read and modify file /etc/update-manager/release-upgrades"
             )
 
@@ -114,7 +113,7 @@ def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = Fa
 def main() -> int:
     args = _parse_arguments()
 
-    if not _check_frequency(args.frequency, args.verbose):
+    if not _check_cooldown(args.cooldown, args.verbose):
         return 0
 
     errcode, msg = upgrade_message("do-release-upgrade", "-c", verbose=args.verbose, timeout=args.timeout)

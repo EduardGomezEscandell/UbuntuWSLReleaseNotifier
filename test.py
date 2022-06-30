@@ -16,7 +16,7 @@ class TestUpgradeNotifier(unittest.TestCase):
                    "=================\n"                                                    \
                    "A new release of Ubuntu is available: Ubuntu 21.10\n"                   \
                    "To know more, run do-release-upgrade\n"                                 \
-                   "To disable or change the frequency of these alerts,\n"                  \
+                   "To change the types of updates you are notified about,\n"                \
                    "read and modify file /etc/update-manager/release-upgrades"
         self.assertEqual(errcode, 0)
         self.assertEqual(msg, expected)
@@ -68,7 +68,7 @@ class TestUpgradeNotifier(unittest.TestCase):
             notify._write_timestamp = self.writer
             notify._read_timestamp = self.reader
 
-    def testFrequency(self):
+    def testcooldown(self):
         now = datetime.datetime.now().astimezone()
         two_minutes_ago = now - datetime.timedelta(0, 140)
         two_hours_ago = now - datetime.timedelta(0, 8000)
@@ -78,53 +78,53 @@ class TestUpgradeNotifier(unittest.TestCase):
         two_years_ago = now - datetime.timedelta(800)
         with self.__RedirectTimestampIO() as tIO:
             tIO.time = two_minutes_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertFalse(notify._check_frequency("hourly"))
-            self.assertFalse(notify._check_frequency("daily"))
-            self.assertFalse(notify._check_frequency("weekly"))
-            self.assertFalse(notify._check_frequency("monthly"))
-            self.assertFalse(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertFalse(notify._check_cooldown("hour"))
+            self.assertFalse(notify._check_cooldown("day"))
+            self.assertFalse(notify._check_cooldown("week"))
+            self.assertFalse(notify._check_cooldown("month"))
+            self.assertFalse(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
             tIO.time = two_hours_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertTrue(notify._check_frequency("hourly"))
-            self.assertFalse(notify._check_frequency("daily"))
-            self.assertFalse(notify._check_frequency("weekly"))
-            self.assertFalse(notify._check_frequency("monthly"))
-            self.assertFalse(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertTrue(notify._check_cooldown("hour"))
+            self.assertFalse(notify._check_cooldown("day"))
+            self.assertFalse(notify._check_cooldown("week"))
+            self.assertFalse(notify._check_cooldown("month"))
+            self.assertFalse(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
             tIO.time = two_days_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertTrue(notify._check_frequency("hourly"))
-            self.assertTrue(notify._check_frequency("daily"))
-            self.assertFalse(notify._check_frequency("weekly"))
-            self.assertFalse(notify._check_frequency("monthly"))
-            self.assertFalse(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertTrue(notify._check_cooldown("hour"))
+            self.assertTrue(notify._check_cooldown("day"))
+            self.assertFalse(notify._check_cooldown("week"))
+            self.assertFalse(notify._check_cooldown("month"))
+            self.assertFalse(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
             tIO.time = two_weeks_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertTrue(notify._check_frequency("hourly"))
-            self.assertTrue(notify._check_frequency("daily"))
-            self.assertTrue(notify._check_frequency("weekly"))
-            self.assertFalse(notify._check_frequency("monthly"))
-            self.assertFalse(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertTrue(notify._check_cooldown("hour"))
+            self.assertTrue(notify._check_cooldown("day"))
+            self.assertTrue(notify._check_cooldown("week"))
+            self.assertFalse(notify._check_cooldown("month"))
+            self.assertFalse(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
             tIO.time = two_months_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertTrue(notify._check_frequency("hourly"))
-            self.assertTrue(notify._check_frequency("daily"))
-            self.assertTrue(notify._check_frequency("weekly"))
-            self.assertTrue(notify._check_frequency("monthly"))
-            self.assertFalse(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertTrue(notify._check_cooldown("hour"))
+            self.assertTrue(notify._check_cooldown("day"))
+            self.assertTrue(notify._check_cooldown("week"))
+            self.assertTrue(notify._check_cooldown("month"))
+            self.assertFalse(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
             tIO.time = two_years_ago
-            self.assertTrue(notify._check_frequency("always"))
-            self.assertTrue(notify._check_frequency("hourly"))
-            self.assertTrue(notify._check_frequency("daily"))
-            self.assertTrue(notify._check_frequency("weekly"))
-            self.assertTrue(notify._check_frequency("monthly"))
-            self.assertTrue(notify._check_frequency("yearly"))
-            self.assertFalse(notify._check_frequency("never"))
+            self.assertTrue(notify._check_cooldown("none"))
+            self.assertTrue(notify._check_cooldown("hour"))
+            self.assertTrue(notify._check_cooldown("day"))
+            self.assertTrue(notify._check_cooldown("week"))
+            self.assertTrue(notify._check_cooldown("month"))
+            self.assertTrue(notify._check_cooldown("year"))
+            self.assertFalse(notify._check_cooldown("inf"))
 
 
 if __name__ == '__main__':
