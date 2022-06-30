@@ -2,6 +2,8 @@
 import sys
 import subprocess
 import re
+import argparse
+
 from typing import List, Tuple
 
 
@@ -33,46 +35,27 @@ def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = Fa
             )
 
 
-def _help() -> str:
-    print("Displays a message if there is an Ubuntu update")
-    print("available, does nothing otherwise. It is intended")
-    print("to be called from .bashrc or .profile.")
-    print("Usage: notify.py [FLAG]")
-    print("Flags: ")
-    print("  -v                Enables verbose mode")
-    print("  -h or --help      Prints this screen")
+def _parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description='Displays a message if there is an Ubuntu update, available, does nothing otherwise.')
 
+    parser.add_argument(
+        '-v', '--verbose', dest='verbose', action='store_true', help='enable verbose mode')
+    parser.add_argument(
+        '-t', '--timeout', dest='timeout', type=float, metavar='SECONDS', default=1.5,
+        help='set a timeout for the upgrade querry.')
 
-def _parse_arguments() -> bool:
-    argv = set(sys.argv[1:])
-
-    if "-h" in argv or "--help" in argv:
-        _help()
-        sys.exit(0)
-
-    verbose = False
-    if argv.intersection({"-v", "--verbose"}):
-        argv.difference_update({"-v", "--verbose"})
-        verbose = True
-
-    if argv:
-        _help()
-        print()
-        print(f"Unknown argument{'s' if len(argv) > 1 else ''}: ")
-        [print(f"    {a}") for a in argv]
-        sys.exit(1)
-
-    return verbose
+    return parser.parse_args()
 
 
 def main() -> int:
-    verbose = _parse_arguments()
+    config = _parse_arguments()
 
-    errcode, msg = upgrade_message("do-release-upgrade", "-c", verbose=verbose)
+    errcode, msg = upgrade_message("do-release-upgrade", "-c", verbose=config.verbose, timeout=config.timeout)
 
     if not errcode and msg:
         print(msg)
-    elif not errcode and verbose:
+    elif not errcode and config.verbose:
         print("NO MESSAGE")
 
     return errcode
