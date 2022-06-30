@@ -12,5 +12,5 @@ Go to `.bashrc` or `.profile` and append the following line at the end:
 ```
 If you have high latency, you can increase the max timeout.
 ```bash
-./path-to-repository/notify.py --frequency=daily --timeout=SECONDS
+./path-to-repository/notify.py --frequency=daily --timeout=<SECONDS>
 ```
