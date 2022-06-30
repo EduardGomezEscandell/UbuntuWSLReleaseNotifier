@@ -37,7 +37,7 @@ def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = Fa
 
 def _parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description='Displays a message if there is an Ubuntu update, available, does nothing otherwise.')
+        description='Displays a message if there is an Ubuntu update available, does nothing otherwise.')
 
     parser.add_argument(
         '-v', '--verbose', dest='verbose', action='store_true', help='enable verbose mode')
