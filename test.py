@@ -31,6 +31,10 @@ class TestUpgradeNotifier(unittest.TestCase):
         msg = notify.upgrade_message("printf", fake_response)
         self.assertFalse(msg)
 
+    def testFailure(self):
+        fake_response = r"\"Checking for a new Ubuntu release\n^CTraceback (most recent call last):\n  File \"/usr/bin/do-release-upgrade\", line 136, in <module>\n    m.downloaded.wait()\n  File \"/usr/lib/python3.8/threading.py\", line 558, in wait\n    signaled = self._cond.wait(timeout)\n  File \"/usr/lib/python3.8/threading.py\", line 302, in wait\n    waiter.acquire()\nKeyboardInterrupt\""
+        msg = notify.upgrade_message("printf", fake_response)
+        self.assertFalse(msg)
 
 if __name__ == '__main__':
     unittest.main()
