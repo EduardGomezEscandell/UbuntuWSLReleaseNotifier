@@ -21,7 +21,7 @@ def _frequecies() -> Dict[str, int]:
     freqs = {
         "always": lambda *_: True,
         "never": lambda *_: False,
-        "hourly": lambda now, last: (now - last).seconds >= 3600,
+        "hourly": lambda now, last: (now - last).total_seconds() >= 3600,
         "daily": lambda now, last: (now - last).days >= 1,
         "weekly": lambda now, last: (now - last).days >= 7,
         "monthly": lambda now, last: (now - last).days >= 30,
@@ -30,7 +30,7 @@ def _frequecies() -> Dict[str, int]:
     return freqs
 
 
-def _read_timestamp(verbose: bool) -> datetime.datetime:
+def _read_timestamp(verbose: bool = False) -> datetime.datetime:
     _log(verbose, f"Reading file {_TIMESTAMP_FILE}")
     try:
         with open(_TIMESTAMP_FILE, "r") as f:
@@ -40,7 +40,7 @@ def _read_timestamp(verbose: bool) -> datetime.datetime:
         return datetime.datetime(1900, 1, 1).astimezone()
 
 
-def _write_timestamp(timestamp: datetime.datetime, verbose: bool) -> None:
+def _write_timestamp(timestamp: datetime.datetime, verbose: bool = False) -> None:
     _log(verbose, f"Updating file {_TIMESTAMP_FILE}")
     try:
         with open(_TIMESTAMP_FILE, "w") as f:
@@ -49,7 +49,7 @@ def _write_timestamp(timestamp: datetime.datetime, verbose: bool) -> None:
         _log(verbose, f"Failed to write timestamp: {e.what}")
 
 
-def _print_or_raise(errcode: int, message_or_exception, verbose: bool) -> int:
+def _print_or_raise(errcode: int, message_or_exception, verbose: bool = False) -> int:
     if not errcode and message_or_exception:
         _log(True, message_or_exception)
     elif not errcode:
@@ -76,12 +76,14 @@ def _parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _check_frequency(frequency: str, verbose: bool) -> bool:
+def _check_frequency(frequency: str, verbose: bool = False) -> bool:
     last_notif = _read_timestamp(verbose)
     validator = _frequecies()[frequency]
     now = datetime.datetime.now().astimezone()
-    _write_timestamp(now, verbose)
-    return validator(now, last_notif)
+    if validator(now, last_notif):
+        _write_timestamp(now, verbose)
+        return True
+    return False
 
 
 def upgrade_message(update_query_cmd: str, *flags: List[str], verbose: bool = False, timeout: float = 5) -> Tuple[int, str]:

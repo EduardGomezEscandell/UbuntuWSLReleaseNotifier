@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import subprocess
 import time
@@ -50,6 +51,80 @@ class TestUpgradeNotifier(unittest.TestCase):
         self.assertEqual(errcode, 1)
         self.assertIsInstance(msg, subprocess.TimeoutExpired)
         self.assertLessEqual(time_elapsed_ms, 1500)
+
+    class __RedirectTimestampIO:
+        "Dependency injection to avoid touching the filesystem"
+        def __init__(self, time: datetime.datetime = datetime.datetime.now()) -> None:
+            self.writer = notify._write_timestamp
+            self.reader = notify._read_timestamp
+            self.time = time
+
+        def __enter__(self):
+            notify._write_timestamp = lambda *_: None
+            notify._read_timestamp = lambda *_: self.time
+            return self
+
+        def __exit__(self, *_):
+            notify._write_timestamp = self.writer
+            notify._read_timestamp = self.reader
+
+    def testFrequency(self):
+        now = datetime.datetime.now().astimezone()
+        two_minutes_ago = now - datetime.timedelta(0, 140)
+        two_hours_ago = now - datetime.timedelta(0, 8000)
+        two_days_ago = now - datetime.timedelta(2)
+        two_weeks_ago = now - datetime.timedelta(14)
+        two_months_ago = now - datetime.timedelta(70)
+        two_years_ago = now - datetime.timedelta(800)
+        with self.__RedirectTimestampIO() as tIO:
+            tIO.time = two_minutes_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertFalse(notify._check_frequency("hourly"))
+            self.assertFalse(notify._check_frequency("daily"))
+            self.assertFalse(notify._check_frequency("weekly"))
+            self.assertFalse(notify._check_frequency("monthly"))
+            self.assertFalse(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
+            tIO.time = two_hours_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertTrue(notify._check_frequency("hourly"))
+            self.assertFalse(notify._check_frequency("daily"))
+            self.assertFalse(notify._check_frequency("weekly"))
+            self.assertFalse(notify._check_frequency("monthly"))
+            self.assertFalse(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
+            tIO.time = two_days_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertTrue(notify._check_frequency("hourly"))
+            self.assertTrue(notify._check_frequency("daily"))
+            self.assertFalse(notify._check_frequency("weekly"))
+            self.assertFalse(notify._check_frequency("monthly"))
+            self.assertFalse(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
+            tIO.time = two_weeks_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertTrue(notify._check_frequency("hourly"))
+            self.assertTrue(notify._check_frequency("daily"))
+            self.assertTrue(notify._check_frequency("weekly"))
+            self.assertFalse(notify._check_frequency("monthly"))
+            self.assertFalse(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
+            tIO.time = two_months_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertTrue(notify._check_frequency("hourly"))
+            self.assertTrue(notify._check_frequency("daily"))
+            self.assertTrue(notify._check_frequency("weekly"))
+            self.assertTrue(notify._check_frequency("monthly"))
+            self.assertFalse(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
+            tIO.time = two_years_ago
+            self.assertTrue(notify._check_frequency("always"))
+            self.assertTrue(notify._check_frequency("hourly"))
+            self.assertTrue(notify._check_frequency("daily"))
+            self.assertTrue(notify._check_frequency("weekly"))
+            self.assertTrue(notify._check_frequency("monthly"))
+            self.assertTrue(notify._check_frequency("yearly"))
+            self.assertFalse(notify._check_frequency("never"))
 
 
 if __name__ == '__main__':
