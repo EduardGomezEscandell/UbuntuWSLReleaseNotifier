@@ -69,7 +69,7 @@ def _parse_arguments() -> argparse.Namespace:
         help='set a timeout for the upgrade querry.')
     parser.add_argument(
         '-c', '--cooldown', dest='cooldown', type=str, choices=_cooldowns().keys(),
-        default="daily", help="set a cooldown for this alert"
+        default="day", help="set a cooldown for this alert"
     )
 
     return parser.parse_args()
