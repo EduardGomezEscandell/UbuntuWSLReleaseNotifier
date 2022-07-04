@@ -20,23 +20,34 @@ def _log(enable: bool, *message) -> None:
 def _cooldowns() -> Dict[str, int]:
     return {
         "none": lambda *_: True,
-        "hour": lambda now, last: (now - last).total_seconds() >= 3600,
-        "day": lambda now, last: (now - last).days >= 1,
-        "week": lambda now, last: (now - last).days >= 7,
-        "month": lambda now, last: (now - last).days >= 30,
-        "year": lambda now, last: (now - last).days >= 365,
+        "hour": lambda now, last: (now - last.get()).total_seconds() >= 3600,
+        "day": lambda now, last: (now - last.get()).days >= 1,
+        "week": lambda now, last: (now - last.get()).days >= 7,
+        "month": lambda now, last: (now - last.get()).days >= 30,
+        "year": lambda now, last: (now - last.get()).days >= 365,
         "inf": lambda *_: False,
     }
 
+class _LazyDatetime:
+    def __init__(self, verbose) -> None:
+        self.verbose = verbose
+        self.date = None
+    
+    def get(self):
+        if self.date:
+            return self.date
+        else:
+            self.date = self.__read()
+            return self.date
 
-def _read_timestamp(verbose: bool = False) -> datetime.datetime:
-    _log(verbose, f"Reading file {_TIMESTAMP_FILE}")
-    try:
-        with open(_TIMESTAMP_FILE, "r") as f:
-            return datetime.datetime.fromisoformat(f.read())
-    except Exception:
-        _log(verbose, f"Failed to read timestamp")
-        return datetime.datetime(1900, 1, 1).astimezone()
+    def _read(self):
+        _log(self.verbose, f"Reading file {_TIMESTAMP_FILE}")
+        try:
+            with open(_TIMESTAMP_FILE, "r") as f:
+                return datetime.datetime.fromisoformat(f.read())
+        except Exception:
+            _log(self.verbose, f"Failed to read timestamp")
+            return datetime.datetime(1900, 1, 1).astimezone()
 
 
 def _write_timestamp(timestamp: datetime.datetime, verbose: bool = False) -> None:
@@ -76,7 +87,7 @@ def _parse_arguments() -> argparse.Namespace:
 
 
 def _check_cooldown(cooldown: str, verbose: bool = False) -> bool:
-    last_notif = _read_timestamp(verbose)
+    last_notif = _LazyDatetime(verbose)
     validator = _cooldowns()[cooldown]
     now = datetime.datetime.now().astimezone()
     if validator(now, last_notif):

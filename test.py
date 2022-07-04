@@ -56,17 +56,17 @@ class TestUpgradeNotifier(unittest.TestCase):
         "Dependency injection to avoid touching the filesystem"
         def __init__(self, time: datetime.datetime = datetime.datetime.now()) -> None:
             self.writer = notify._write_timestamp
-            self.reader = notify._read_timestamp
+            self.reader = notify._LazyDatetime.get
             self.time = time
 
         def __enter__(self):
             notify._write_timestamp = lambda *_: None
-            notify._read_timestamp = lambda *_: self.time
+            notify._LazyDatetime.get = lambda *_: self.time
             return self
 
         def __exit__(self, *_):
             notify._write_timestamp = self.writer
-            notify._read_timestamp = self.reader
+            notify._LazyDatetime.get = self.reader
 
     def testcooldown(self):
         now = datetime.datetime.now().astimezone()
