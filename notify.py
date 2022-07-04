@@ -34,7 +34,7 @@ class _LazyDatetime:
         self.date = None
     
     def get(self):
-        if self.date:
+        if self.date is not None:
             return self.date
         else:
             self.date = self.__read()
@@ -46,7 +46,7 @@ class _LazyDatetime:
             with open(_TIMESTAMP_FILE, "r") as f:
                 return datetime.datetime.fromisoformat(f.read())
         except Exception:
-            _log(self.verbose, f"Failed to read timestamp")
+            _log(self.verbose, "Failed to read timestamp")
             return datetime.datetime(1900, 1, 1).astimezone()
 
 
